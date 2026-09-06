@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SheEarns — Financial Independence Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            plum: { 50: '#faf5f7', 100: '#f3e8ee', 200: '#e9d0dc', 300: '#d9a9c0', 400: '#c47a9d', 500: '#a84d7a', 600: '#8f3a63', 700: '#762e50', 800: '#632843', 900: '#54243a', 950: '#32111f' },
+            gold: { 50: '#fbf8f1', 100: '#f5eedc', 200: '#eadcba', 300: '#dbc38e', 400: '#cba662', 500: '#b88d45', 600: '#9e7139', 700: '#7f5731', 800: '#6a472d', 900: '#5a3c29', 950: '#331f14' },
+            cream: { 50: '#fdfcfa', 100: '#f9f6f0', 200: '#f2ebe0', 300: '#e8dcc9', 400: '#d9c5a8', 500: '#c9ab87' }
+          },
+          fontFamily: {
+            display: ['Playfair Display', 'serif'],
+            sans: ['Inter', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script crossorigin src="https://unpkg.com/prop-types@15/prop-types.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; background: #fdfcfa; }
+    .font-display { font-family: 'Playfair Display', serif; }
+    .score-ring-container { position: relative; width: 220px; height: 220px; }
+    .score-ring-bg { stroke: #e9d0dc; }
+    .score-ring-fill { stroke: url(#scoreGradient); stroke-linecap: round; transition: stroke-dashoffset 1.8s cubic-bezier(0.4, 0, 0.2, 1); }
+    .card-shadow { box-shadow: 0 4px 20px -4px rgba(84, 36, 58, 0.08), 0 1px 3px rgba(84, 36, 58, 0.04); }
+    .card-shadow-hover:hover { box-shadow: 0 12px 32px -8px rgba(84, 36, 58, 0.12), 0 4px 12px rgba(84, 36, 58, 0.06); transform: translateY(-2px); }
+    .transition-all { transition: all 0.3s ease; }
+    .animate-count { animation: countUp 1.5s ease-out forwards; }
+    @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+    .pulse-soft { animation: pulse-soft 2s ease-in-out infinite; }
+    .progress-bar { transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1); }
+    .gentle-bg { background: linear-gradient(135deg, #faf5f7 0%, #f9f6f0 50%, #f5eedc 100%); }
+  </style>
+</head>
+<body class="bg-cream-50 text-plum-900">
+  <div id="root">
+    <div style="padding:40px;font-family:system-ui;text-align:center;color:#54243a;">
+      <h2>Loading SheEarns…</h2>
+      <p style="color:#888;font-size:14px;">If this stays blank, open browser DevTools (F12) → Console and tell me the red error.</p>
+    </div>
+  </div>
+
+  <script type="text/plain" id="app-source">
+    // Guard against missing libraries
+    if (typeof React === 'undefined' || typeof ReactDOM === 'undefined') {
+      document.getElementById('root').innerHTML = '<div style="padding:40px;color:red;font-family:system-ui"><h2>React failed to load</h2><p>Check your internet connection or try a different browser.</p></div>';
+      throw new Error('React not loaded');
+    }
+
+    const { useState, useEffect, useMemo, useRef, useCallback } = React;
+    const { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } = (typeof Recharts !== 'undefined' ? Recharts : {});
+
+    // ========== MOCK DATA & CALCULATIONS ==========
+    const DEFAULT_USER = {
+      name: "Priya",
+      incomeType: "Salary",
+      monthlyIncome: 65000,
+      monthlyExpenses: 42000,
+      monthlySavings: 18000,
+      emergencySavings: 25000,
+      existingDebt: 0,
+      hasBusiness: false,
+      businessRevenue: 0,
+      businessYears: 0,
+      financialGoal: "Become financially independent",
+      completedModules: []
+    };
+
+    const LEARNING_MODULES = [
+      { id: "m1", title: "Building an Emergency Fund", time: "3 min", icon: "📖" },
+      { id: "m2", title: "Understanding Cash Flow", time: "4 min", icon: "💡" },
+      { id: "m3", title: "Smart Saving Habits", time: "3 min", icon: "🌱" }
+    ];
+
+    const EXPENSE_CATEGORIES = [
+      { name: "Housing", value: 18000, color: "#8f3a63" },
+      { name: "Food", value: 9000, color: "#b88d45" },
+      { name: "Transport", value: 5000, color: "#c47a9d" },
+      { name: "Personal", value: 6000, color: "#7f5731" },
+      { name: "Other", value: 4000, color: "#d9a9c0" }
+    ];
+
+    function calculateSheScore(user) {
+      const income = user.monthlyIncome || 1;
+      const expenses = user.monthlyExpenses || 1;
+      const savings = user.monthlySavings || 0;
+      const emergency = user.emergencySavings || 0;
+      const modulesCompleted = (user.completedModules || []).length;
+
+      // 1. Savings Stability (0-100)
+      const savingsRate = (savings / income) * 100;
+      let savingsStability = Math.min(100, Math.max(0, savingsRate * 2.5)); // 40% rate = 100
+
+      // 2. Cash Flow Health
+      const surplus = income - expenses;
+      const surplusRate = (surplus / income) * 100;
+      let cashFlowHealth = Math.min(100, Math.max(0, 50 + surplusRate * 1.5));
+
+      // 3. Emergency Preparedness
+      const monthsCoverage = emergency / expenses;
+      let emergencyPrep = Math.min(100, monthsCoverage * 25); // 4 months = 100
+
+      // 4. Financial Literacy
+      let financialLiteracy = 35 + (modulesCompleted * 20); // baseline 35, +20 per module
+      financialLiteracy = Math.min(100, financialLiteracy);
+
+      // 5. Income Stability / Business Readiness
+      let incomeOrBusiness = 70; // default for salary
+      if (user.incomeType === "Freelance") incomeOrBusiness = 55;
+      if (user.incomeType === "Business" || user.hasBusiness) {
+        const years = user.businessYears || 0;
+        const rev = user.businessRevenue || 0;
+        incomeOrBusiness = Math.min(100, 40 + (years * 15) + (rev > 0 ? 20 : 0));
+      }
+      if (user.incomeType === "Other") incomeOrBusiness = 50;
+
+      const components = {
+        savingsStability: Math.round(savingsStability),
+        cashFlowHealth: Math.round(cashFlowHealth),
+        emergencyPrep: Math.round(emergencyPrep),
+        financialLiteracy: Math.round(financialLiteracy),
+        incomeStability: Math.round(incomeOrBusiness)
+      };
+
+      const overall = Math.round(
+        (components.savingsStability +
+         components.cashFlowHealth +
+         components.emergencyPrep +
+         components.financialLiteracy +
+         components.incomeStability) / 5
+      );
+
+      let status = "Starting";
+      if (overall >= 80) status = "Strong";
+      else if (overall >= 60) status = "Growing";
+      else if (overall >= 40) status = "Building";
+
+      return { overall, status, components, monthsCoverage, savingsRate };
+    }
+
+    // ========== RULE-BASED SheAI ==========
+    function getSheAIResponse(questionId, user, scoreData) {
+      const { overall, status, components, monthsCoverage, savingsRate } = scoreData;
+      const name = user.name || "there";
+
+      const responses = {
+        whyScore: `Hi ${name}! Your SheScore of ${overall} places you in the "${status}" range. This is driven primarily by your ${components.savingsStability >= 60 ? "strong" : "developing"} savings stability (${components.savingsStability}) and ${components.emergencyPrep < 50 ? "opportunity in emergency preparedness" : "solid emergency cushion"} (${components.emergencyPrep}). Your cash flow health sits at ${components.cashFlowHealth}. Remember — SheScore measures readiness beyond traditional credit; every step you take moves the needle.`,
+        improve: `Great question, ${name}. To improve your SheScore, focus first on your lowest areas. ${components.emergencyPrep === Math.min(...Object.values(components)) ? `Building your emergency fund toward 3–6 months of expenses (currently ~${monthsCoverage.toFixed(1)} months) will have the biggest impact.` : ""} ${components.savingsStability < 60 ? `Aiming to consistently save 20%+ of income (you're at ${savingsRate.toFixed(0)}%) strengthens Savings Stability.` : ""} Completing the learning modules also lifts your Financial Literacy score. Small, consistent actions compound.`,
+        emergencyFund: `An emergency fund is money set aside specifically for unexpected expenses — medical costs, job loss, urgent repairs — so you don't have to rely on high-interest debt or others. A common target is 3–6 months of essential expenses. Yours currently covers about ${monthsCoverage.toFixed(1)} month(s). Start small if needed: even ₹5,000–10,000 in a separate account builds the habit and the cushion.`,
+        emi: `EMI stands for Equated Monthly Installment — a fixed payment you make each month toward a loan (home, personal, vehicle, etc.) until the principal + interest is fully repaid. Before taking any EMI, check that the total monthly EMIs stay comfortably below 40–50% of your take-home income so cash flow remains healthy. Always read the interest rate, tenure, and prepayment terms.`,
+        irregularIncome: `Managing irregular income (common for freelancers and business owners) works best with a buffer-first approach: 1) Keep 1–2 months of expenses in a liquid account as a float. 2) Pay yourself a fixed "salary" from business/client income each month. 3) Save a higher percentage in high-income months. 4) Track a rolling 3-month average income rather than single months. This stabilizes both lifestyle and your SheScore Income Stability component.`
+      };
+      return responses[questionId] || "I'm here to help you understand your finances better. Try one of the suggested questions!";
+    }
+
+    // ========== COMPONENTS ==========
+    function ScoreRing({ score, status, size = 220 }) {
+      const radius = 90;
+      const circumference = 2 * Math.PI * radius;
+      const offset = circumference - (score / 100) * circumference;
+      const [displayScore, setDisplayScore] = useState(0);
+
+      useEffect(() => {
+        let start = 0;
+        const duration = 1600;
+        const startTime = performance.now();
+        const animate = (now) => {
+          const progress = Math.min((now - startTime) / duration, 1);
+          const ease = 1 - Math.pow(1 - progress, 3);
+          setDisplayScore(Math.round(ease * score));
+          if (progress < 1) requestAnimationFrame(animate);
+        };
+        requestAnimationFrame(animate);
+      }, [score]);
+
+      return (
+        <div className="score-ring-container mx-auto" style={{ width: size, height: size }}>
+          <svg width={size} height={size} viewBox="0 0 220 220" className="transform -rotate-90">
+            <defs>
+              <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#b88d45" />
+                <stop offset="50%" stopColor="#a84d7a" />
+                <stop offset="100%" stopColor="#8f3a63" />
+              </linearGradient>
+            </defs>
+            <circle cx="110" cy="110" r={radius} fill="none" stroke="#f3e8ee" strokeWidth="14" />
+            <circle
+              cx="110" cy="110" r={radius}
+              fill="none"
+              stroke="url(#scoreGradient)"
+              strokeWidth="14"
+              strokeLinecap="round"
+              strokeDasharray={circumference}
+              strokeDashoffset={offset}
+              style={{ transition: "stroke-dashoffset 1.8s cubic-bezier(0.4, 0, 0.2, 1)" }}
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="font-display text-5xl font-bold text-plum-800">{displayScore}</span>
+            <span className="text-sm font-semibold tracking-widest text-gold-600 uppercase mt-1">{status}</span>
+          </div>
+        </div>
+      );
+    }
+
+    function ProgressBar({ label, score, icon, explanation, delay = 0 }) {
+      const [width, setWidth] = useState(0);
+      useEffect(() => {
+        const t = setTimeout(() => setWidth(score), 200 + delay);
+        return () => clearTimeout(t);
+      }, [score, delay]);
+
+      const color = score >= 70 ? "bg-emerald-500" : score >= 45 ? "bg-amber-500" : "bg-rose-400";
+
+      return (
+        <div className="mb-5">
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">{icon}</span>
+              <span className="font-medium text-plum-800">{label}</span>
+            </div>
+            <span className="font-display font-bold text-plum-700">{score}</span>
+          </div>
+          <div className="h-2.5 bg-plum-100 rounded-full overflow-hidden">
+            <div className={`h-full ${color} rounded-full progress-bar`} style={{ width: `${width}%` }} />
+          </div>
+          <p className="text-xs text-plum-600 mt-1.5 leading-relaxed">{explanation}</p>
+        </div>
+      );
+    }
+
+    function AnimatedNumber({ value, prefix = "", suffix = "" }) {
+      const [display, setDisplay] = useState(0);
+      useEffect(() => {
+        let start = 0;
+        const duration = 1200;
+        const startTime = performance.now();
+        const animate = (now) => {
+          const progress = Math.min((now - startTime) / duration, 1);
+          const ease = 1 - Math.pow(1 - progress, 3);
+          setDisplay(Math.round(ease * value));
+          if (progress < 1) requestAnimationFrame(animate);
+        };
+        requestAnimationFrame(animate);
+      }, [value]);
+      return <span>{prefix}{display.toLocaleString("en-IN")}{suffix}</span>;
+    }
+
+    // ========== PAGES ==========
+    function Landing({ onStart }) {
+      return (
+        <div className="min-h-screen">
+          {/* Hero */}
+          <section className="relative overflow-hidden px-6 pt-16 pb-20 md:pt-24 md:pb-28">
+            <div className="absolute inset-0 bg-gradient-to-br from-plum-50 via-cream-50 to-gold-50 opacity-80" />
+            <div className="relative max-w-5xl mx-auto text-center">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-plum-100 text-plum-700 text-sm font-medium mb-6">
+                <span>✨</span> AI-powered financial empowerment
+              </div>
+              <h1 className="font-display text-4xl md:text-6xl font-bold text-plum-900 leading-tight mb-6">
+                Understand your money.<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-plum-600 to-gold-600">Build your independence.</span>
+              </h1>
+              <p className="text-lg md:text-xl text-plum-700 max-w-2xl mx-auto mb-10 leading-relaxed">
+                An AI-powered financial empowerment platform helping women understand their finances, build financial confidence, and strengthen their financial readiness.
+              </p>
+              <button
+                onClick={onStart}
+                className="inline-flex items-center gap-2 px-8 py-4 bg-plum-700 hover:bg-plum-800 text-white font-semibold rounded-2xl text-lg shadow-lg shadow-plum-700/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                Get Started →
+              </button>
+            </div>
+          </section>
+
+          {/* Feature cards */}
+          <section className="px-6 pb-24 -mt-8">
+            <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-6">
+              {[
+                { icon: "💰", title: "Track", desc: "Income, expenses & savings at a glance. Clear visibility into your monthly money flow." },
+                { icon: "⭐", title: "SheScore", desc: "A financial readiness score beyond traditional credit history — built for real life." },
+                { icon: "🤖", title: "SheAI", desc: "Simple, personalized guidance that answers your questions with clarity and care." }
+              ].map((f, i) => (
+                <div key={i} className="bg-white rounded-2xl p-6 card-shadow card-shadow-hover transition-all border border-plum-50">
+                  <div className="text-3xl mb-3">{f.icon}</div>
+                  <h3 className="font-display text-xl font-bold text-plum-800 mb-2">{f.title}</h3>
+                  <p className="text-plum-600 text-sm leading-relaxed">{f.desc}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <footer className="text-center py-8 text-sm text-plum-500">
+            SheEarns — Educational demo for hackathon. Not a lending product or credit bureau.
+          </footer>
+        </div>
+      );
+    }
+
+    function Onboarding({ user, setUser, onComplete }) {
+      const [form, setForm] = useState({ ...user });
+      const [showBusiness, setShowBusiness] = useState(user.hasBusiness);
+
+      const handleChange = (field, value) => {
+        setForm(prev => ({ ...prev, [field]: value }));
+        if (field === "hasBusiness") setShowBusiness(value);
+      };
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        setUser({ ...form, completedModules: form.completedModules || [] });
+        onComplete();
+      };
+
+      return (
+        <div className="min-h-screen px-4 py-10">
+          <div className="max-w-xl mx-auto">
+            <div className="text-center mb-8">
+              <h1 className="font-display text-3xl font-bold text-plum-900 mb-2">Your Financial Profile</h1>
+              <p className="text-plum-600">A few details to personalize your experience. Pre-filled with sample data — edit freely.</p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="bg-white rounded-3xl p-6 md:p-8 card-shadow space-y-5 border border-plum-50">
+              <div>
+                <label className="block text-sm font-medium text-plum-700 mb-1.5">Name</label>
+                <input type="text" value={form.name} onChange={e => handleChange("name", e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-plum-200 focus:border-plum-500 focus:ring-2 focus:ring-plum-200 outline-none transition" required />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-plum-700 mb-1.5">Income type</label>
+                <select value={form.incomeType} onChange={e => handleChange("incomeType", e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-plum-200 focus:border-plum-500 focus:ring-2 focus:ring-plum-200 outline-none transition bg-white">
+                  <option>Salary</option>
+                  <option>Freelance</option>
+                  <option>Business</option>
+                  <option>Other</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-plum-700 mb-1.5">Monthly income (₹)</label>
+                  <input type="number" value={form.monthlyIncome} onChange={e => handleChange("monthlyIncome", +e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-plum-200 focus:border-plum-500 focus:ring-2 focus:ring-plum-200 outline-none" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-plum-700 mb-1.5">Monthly expenses (₹)</label>
+                  <input type="number" value={form.monthlyExpenses} onChange={e => handleChange("monthlyExpenses", +e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-plum-200 focus:border-plum-500 focus:ring-2 focus:ring-plum-200 outline-none" required />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-plum-700 mb-1.5">Monthly savings (₹)</label>
+                  <input type="number" value={form.monthlySavings} onChange={e => handleChange("monthlySavings", +e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-plum-200 focus:border-plum-500 focus:ring-2 focus:ring-plum-200 outline-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-plum-700 mb-1.5">Emergency savings (₹)</label>
+                  <input type="number" value={form.emergencySavings} onChange={e => handleChange("emergencySavings", +e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-plum-200 focus:border-plum-500 focus:ring-2 focus:ring-plum-200 outline-none" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-plum-700 mb-1.5">Existing loans / debt (₹, optional)</label>
+                <input type="number" value={form.existingDebt} onChange={e => handleChange("existingDebt", +e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-plum-200 focus:border-plum-500 focus:ring-2 focus:ring-plum-200 outline-none" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-plum-700 mb-2">Do you own or run a business?</label>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" checked={form.hasBusiness === true} onChange={() => handleChange("hasBusiness", true)} className="accent-plum-600" />
+                    <span>Yes</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" checked={form.hasBusiness === false} onChange={() => handleChange("hasBusiness", false)} className="accent-plum-600" />
+                    <span>No</span>
+                  </label>
+                </div>
+              </div>
+
+              {showBusiness && (
+                <div className="grid grid-cols-2 gap-4 p-4 bg-plum-50 rounded-xl">
+                  <div>
+                    <label className="block text-sm font-medium text-plum-700 mb-1.5">Monthly business revenue (₹)</label>
+                    <input type="number" value={form.businessRevenue} onChange={e => handleChange("businessRevenue", +e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl border border-plum-200 outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-plum-700 mb-1.5">Years operating</label>
+                    <input type="number" value={form.businessYears} onChange={e => handleChange("businessYears", +e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl border border-plum-200 outline-none" />
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-plum-700 mb-1.5">Primary financial goal</label>
+                <select value={form.financialGoal} onChange={e => handleChange("financialGoal", e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-plum-200 focus:border-plum-500 focus:ring-2 focus:ring-plum-200 outline-none bg-white">
+                  <option>Build emergency savings</option>
+                  <option>Become financially independent</option>
+                  <option>Start a business</option>
+                  <option>Expand my business</option>
+                  <option>Improve financial confidence</option>
+                </select>
+              </div>
+
+              <button type="submit"
+                className="w-full py-3.5 bg-plum-700 hover:bg-plum-800 text-white font-semibold rounded-xl transition-all shadow-md shadow-plum-700/20">
+                Continue to Dashboard →
+              </button>
+            </form>
+          </div>
+        </div>
+      );
+    }
+
+    function Dashboard({ user, setUser, onViewScore, onNavigate }) {
+      const scoreData = useMemo(() => calculateSheScore(user), [user]);
+      const savingsRate = ((user.monthlySavings / user.monthlyIncome) * 100).toFixed(0);
+      const monthsCoverage = (user.emergencySavings / user.monthlyExpenses).toFixed(1);
+
+      const toggleModule = (id) => {
+        setUser(prev => {
+          const completed = prev.completedModules || [];
+          const next = completed.includes(id)
+            ? completed.filter(m => m !== id)
+            : [...completed, id];
+          return { ...prev, completedModules: next };
+        });
+      };
+
+      return (
+        <div className="min-h-screen px-4 py-8 pb-20">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+              <div>
+                <h1 className="font-display text-2xl md:text-3xl font-bold text-plum-900">Hello, {user.name} 👋</h1>
+                <p className="text-plum-600 mt-1">Your financial snapshot</p>
+              </div>
+              <button onClick={onViewScore}
+                className="px-5 py-2.5 bg-plum-700 hover:bg-plum-800 text-white font-medium rounded-xl transition shadow-md">
+                View My SheScore →
+              </button>
+            </div>
+
+            {/* Summary cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              {[
+                { label: "Monthly Income", value: user.monthlyIncome, prefix: "₹" },
+                { label: "Monthly Expenses", value: user.monthlyExpenses, prefix: "₹" },
+                { label: "Monthly Savings", value: user.monthlySavings, prefix: "₹" },
+                { label: "Savings Rate", value: +savingsRate, suffix: "%" }
+              ].map((c, i) => (
+                <div key={i} className="bg-white rounded-2xl p-5 card-shadow border border-plum-50">
+                  <p className="text-xs font-medium text-plum-500 uppercase tracking-wide mb-1">{c.label}</p>
+                  <p className="font-display text-2xl font-bold text-plum-800">
+                    <AnimatedNumber value={c.value} prefix={c.prefix || ""} suffix={c.suffix || ""} />
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6 mb-8">
+              {/* Expense chart */}
+              <div className="bg-white rounded-2xl p-6 card-shadow border border-plum-50">
+                <h3 className="font-display text-lg font-bold text-plum-800 mb-4">Expense Breakdown</h3>
+                {typeof ResponsiveContainer !== 'undefined' && typeof PieChart !== 'undefined' ? (
+                  <ResponsiveContainer width="100%" height={220}>
+                    <PieChart>
+                      <Pie data={EXPENSE_CATEGORIES} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} innerRadius={45} paddingAngle={3}>
+                        {EXPENSE_CATEGORIES.map((entry, index) => (
+                          <Cell key={index} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(v) => `₹${Number(v).toLocaleString("en-IN")}`} />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="space-y-2 py-4">
+                    {EXPENSE_CATEGORIES.map((c, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <div className="w-3 h-3 rounded-full" style={{background: c.color}}></div>
+                        <span className="text-sm text-plum-700 flex-1">{c.name}</span>
+                        <span className="text-sm font-medium text-plum-800">₹{c.value.toLocaleString("en-IN")}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Insights */}
+              <div className="bg-white rounded-2xl p-6 card-shadow border border-plum-50">
+                <h3 className="font-display text-lg font-bold text-plum-800 mb-4">Financial Insights</h3>
+                <div className="space-y-3">
+                  <div className="flex gap-3 p-3 rounded-xl bg-emerald-50 border border-emerald-100">
+                    <span className="text-xl">🟢</span>
+                    <p className="text-sm text-emerald-800 leading-relaxed">
+                      Good saving habit — you're saving <strong>{savingsRate}%</strong> of your monthly income.
+                    </p>
+                  </div>
+                  {+monthsCoverage < 3 && (
+                    <div className="flex gap-3 p-3 rounded-xl bg-amber-50 border border-amber-100">
+                      <span className="text-xl">🟡</span>
+                      <p className="text-sm text-amber-800 leading-relaxed">
+                        Emergency fund opportunity — your savings currently cover about <strong>{monthsCoverage}</strong> months of expenses.
+                      </p>
+                    </div>
+                  )}
+                  <div className="flex gap-3 p-3 rounded-xl bg-plum-50 border border-plum-100">
+                    <span className="text-xl">💜</span>
+                    <p className="text-sm text-plum-700 leading-relaxed">
+                      Goal focus: <strong>{user.financialGoal}</strong>. Your dashboard is tuned around this.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Learning modules */}
+            <div className="bg-white rounded-2xl p-6 card-shadow border border-plum-50 mb-8">
+              <h3 className="font-display text-lg font-bold text-plum-800 mb-4">Recommended Learning</h3>
+              <div className="grid sm:grid-cols-3 gap-4">
+                {LEARNING_MODULES.map(m => {
+                  const done = (user.completedModules || []).includes(m.id);
+                  return (
+                    <div key={m.id} className={`p-4 rounded-xl border transition ${done ? "bg-emerald-50 border-emerald-200" : "bg-cream-50 border-plum-100"}`}>
+                      <div className="text-2xl mb-2">{m.icon}</div>
+                      <h4 className="font-semibold text-plum-800 text-sm mb-1">{m.title}</h4>
+                      <p className="text-xs text-plum-500 mb-3">{m.time}</p>
+                      <button
+                        onClick={() => toggleModule(m.id)}
+                        className={`text-xs font-medium px-3 py-1.5 rounded-lg transition ${done ? "bg-emerald-600 text-white" : "bg-plum-100 text-plum-700 hover:bg-plum-200"}`}
+                      >
+                        {done ? "✓ Completed" : "Mark Complete"}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-plum-500 mt-3">Completing modules improves your Financial Literacy sub-score.</p>
+            </div>
+
+            <div className="flex flex-wrap gap-3 justify-center">
+              <button onClick={onViewScore} className="px-6 py-3 bg-plum-700 hover:bg-plum-800 text-white font-semibold rounded-xl shadow-md transition">
+                View My SheScore →
+              </button>
+              <button onClick={() => onNavigate("independence")} className="px-6 py-3 bg-white border border-plum-200 text-plum-700 font-medium rounded-xl hover:bg-plum-50 transition">
+                Financial Independence Check
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function SheScorePage({ user, setUser, onNavigate }) {
+      const scoreData = useMemo(() => calculateSheScore(user), [user]);
+      const { overall, status, components, monthsCoverage, savingsRate } = scoreData;
+      const [aiAnswer, setAiAnswer] = useState(null);
+      const [activeQ, setActiveQ] = useState(null);
+
+      const componentMeta = [
+        { key: "savingsStability", label: "Savings Stability", icon: "💰", expl: `Based on your savings rate of ${savingsRate.toFixed(0)}% of income.` },
+        { key: "cashFlowHealth", label: "Cash Flow Health", icon: "📊", expl: `Income minus expenses leaves a ${user.monthlyIncome - user.monthlyExpenses >= 0 ? "positive" : "negative"} monthly surplus.` },
+        { key: "emergencyPrep", label: "Emergency Preparedness", icon: "🛡", expl: `Your emergency savings currently cover approximately ${monthsCoverage.toFixed(1)} months of expenses.` },
+        { key: "financialLiteracy", label: "Financial Literacy", icon: "📚", expl: `Based on ${(user.completedModules || []).length} of 3 learning modules completed.` },
+        { key: "incomeStability", label: user.hasBusiness || user.incomeType === "Business" ? "Business Readiness" : "Income Stability", icon: "🏢", expl: user.hasBusiness ? `Reflects business operating time and revenue consistency.` : `Reflects the stability profile of ${user.incomeType.toLowerCase()} income.` }
+      ];
+
+      const sorted = [...componentMeta].sort((a, b) => components[b.key] - components[a.key]);
+      const strength = sorted[0];
+      const opportunity = sorted[sorted.length - 1];
+      const growing = sorted[Math.floor(sorted.length / 2)];
+
+      const questions = [
+        { id: "whyScore", label: `Why is my SheScore ${overall}?` },
+        { id: "improve", label: "How can I improve my score?" },
+        { id: "emergencyFund", label: "What is an emergency fund?" },
+        { id: "emi", label: "How does EMI work?" },
+        { id: "irregularIncome", label: "How should I manage irregular income?" }
+      ];
+
+      const askAI = (q) => {
+        setActiveQ(q.id);
+        setAiAnswer(null);
+        setTimeout(() => {
+          setAiAnswer(getSheAIResponse(q.id, user, scoreData));
+        }, 400);
+      };
+
+      // Action plan ordered by weakest
+      const weakest = [...componentMeta].sort((a, b) => components[a.key] - components[b.key]).slice(0, 3);
+      const actionMap = {
+        savingsStability: { title: "Strengthen consistent saving", current: `${savingsRate.toFixed(0)}% of income`, goal: "Aim for 20%+ consistently", module: "Smart Saving Habits" },
+        cashFlowHealth: { title: "Improve monthly surplus", current: `₹${(user.monthlyIncome - user.monthlyExpenses).toLocaleString("en-IN")} net`, goal: "Increase surplus or reduce discretionary spend", module: "Understanding Cash Flow" },
+        emergencyPrep: { title: "Build emergency cushion", current: `${monthsCoverage.toFixed(1)} months coverage`, goal: "Target 3–6 months of expenses", module: "Building an Emergency Fund" },
+        financialLiteracy: { title: "Grow financial knowledge", current: `${(user.completedModules || []).length}/3 modules`, goal: "Complete remaining modules", module: "Any remaining module" },
+        incomeStability: { title: "Stabilize income base", current: user.incomeType, goal: "Build buffer & diversify if irregular", module: "Understanding Cash Flow" }
+      };
+
+      return (
+        <div className="min-h-screen px-4 py-8 pb-24">
+          <div className="max-w-4xl mx-auto">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <h1 className="font-display text-3xl font-bold text-plum-900 mb-2">⭐ My SheScore</h1>
+              <p className="text-plum-600 mb-3">Understand your financial readiness beyond traditional credit history.</p>
+              <p className="text-xs text-plum-500 italic max-w-lg mx-auto">
+                SheScore is an educational financial-readiness indicator. It is not an official credit score or lending decision.
+              </p>
+            </div>
+
+            {/* Hero ring */}
+            <div className="bg-white rounded-3xl p-8 card-shadow border border-plum-50 mb-8 text-center">
+              <ScoreRing score={overall} status={status} />
+              <p className="mt-6 text-plum-700 max-w-md mx-auto leading-relaxed">
+                {status === "Strong" && "You're in a strong position. Keep nurturing the habits that got you here."}
+                {status === "Growing" && "You're building real momentum. A few focused steps will push you into the Strong range."}
+                {status === "Building" && "Solid foundations are forming. Consistent small actions will accelerate your progress."}
+                {status === "Starting" && "Every journey begins with a first step. You're already taking it by being here."}
+              </p>
+            </div>
+
+            {/* Breakdown */}
+            <div className="bg-white rounded-3xl p-6 md:p-8 card-shadow border border-plum-50 mb-8">
+              <h2 className="font-display text-xl font-bold text-plum-800 mb-6">Score Breakdown</h2>
+              {componentMeta.map((c, i) => (
+                <ProgressBar
+                  key={c.key}
+                  label={c.label}
+                  score={components[c.key]}
+                  icon={c.icon}
+                  explanation={c.expl}
+                  delay={i * 100}
+                />
+              ))}
+            </div>
+
+            {/* Why This Score */}
+            <div className="mb-8">
+              <h2 className="font-display text-xl font-bold text-plum-800 mb-4">Why This Score?</h2>
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5">
+                  <div className="text-2xl mb-2">💪</div>
+                  <h3 className="font-semibold text-emerald-800 mb-1">Strength</h3>
+                  <p className="text-sm text-emerald-700">{strength.label} — {components[strength.key]}</p>
+                </div>
+                <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5">
+                  <div className="text-2xl mb-2">🎯</div>
+                  <h3 className="font-semibold text-amber-800 mb-1">Biggest Opportunity</h3>
+                  <p className="text-sm text-amber-700">{opportunity.label} — {components[opportunity.key]}</p>
+                </div>
+                <div className="bg-plum-50 border border-plum-100 rounded-2xl p-5">
+                  <div className="text-2xl mb-2">🌱</div>
+                  <h3 className="font-semibold text-plum-800 mb-1">Growing Area</h3>
+                  <p className="text-sm text-plum-700">{growing.label} — {components[growing.key]}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Plan */}
+            <div className="bg-white rounded-3xl p-6 md:p-8 card-shadow border border-plum-50 mb-8">
+              <h2 className="font-display text-xl font-bold text-plum-800 mb-5">Your Path Forward</h2>
+              <div className="space-y-4">
+                {weakest.map((w, i) => {
+                  const a = actionMap[w.key];
+                  return (
+                    <div key={w.key} className="flex gap-4 p-4 rounded-xl bg-cream-50 border border-plum-100">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-plum-200 text-plum-800 font-bold flex items-center justify-center text-sm">{i + 1}</div>
+                      <div>
+                        <h4 className="font-semibold text-plum-800">{a.title}</h4>
+                        <p className="text-sm text-plum-600 mt-0.5">Current: {a.current} → Goal: {a.goal}</p>
+                        <p className="text-xs text-gold-700 mt-1">📚 Suggested: {a.module}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* SheAI */}
+            <div className="bg-white rounded-3xl p-6 md:p-8 card-shadow border border-plum-50 mb-8">
+              <h2 className="font-display text-xl font-bold text-plum-800 mb-2">🤖 Ask SheAI</h2>
+              <p className="text-sm text-plum-600 mb-5">Choose a question for personalized, clear guidance based on your profile.</p>
+              <div className="flex flex-wrap gap-2 mb-5">
+                {questions.map(q => (
+                  <button
+                    key={q.id}
+                    onClick={() => askAI(q)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition border ${activeQ === q.id ? "bg-plum-700 text-white border-plum-700" : "bg-plum-50 text-plum-700 border-plum-200 hover:bg-plum-100"}`}
+                  >
+                    {q.label}
+                  </button>
+                ))}
+              </div>
+              {aiAnswer && (
+                <div className="p-5 rounded-2xl bg-gradient-to-br from-plum-50 to-gold-50 border border-plum-100">
+                  <p className="text-plum-800 leading-relaxed whitespace-pre-line">{aiAnswer}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-3 justify-center">
+              <button onClick={() => onNavigate("dashboard")} className="px-5 py-2.5 bg-white border border-plum-200 text-plum-700 rounded-xl hover:bg-plum-50 transition">
+                ← Dashboard
+              </button>
+              <button onClick={() => onNavigate("independence")} className="px-5 py-2.5 bg-plum-700 text-white rounded-xl hover:bg-plum-800 transition">
+                Financial Independence Check →
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function IndependenceCheck({ onNavigate }) {
+      const questions = [
+        "Do you have independent access to your income?",
+        "Can you independently access your bank account or financial information?",
+        "Can you make personal financial decisions without being prevented from doing so?",
+        "Do you have access to money in case of an emergency?",
+        "Are important financial documents accessible to you?"
+      ];
+      const [answers, setAnswers] = useState(Array(5).fill(null));
+      const [submitted, setSubmitted] = useState(false);
+
+      const setAnswer = (idx, val) => {
+        const next = [...answers];
+        next[idx] = val;
+        setAnswers(next);
+      };
+
+      const allAnswered = answers.every(a => a !== null);
+      const noCount = answers.filter(a => a === "no").length;
+      const sometimesCount = answers.filter(a => a === "sometimes").length;
+
+      const getInsight = () => {
+        if (noCount === 0 && sometimesCount === 0) {
+          return "Your responses suggest you currently have independent access across the areas we asked about. Continuing to maintain that access is a strong foundation for financial confidence.";
+        }
+        if (noCount >= 3 || (noCount + sometimesCount) >= 4) {
+          return "Your responses indicate that there may be areas where your independent access to financial resources could be strengthened. Many people find that even small steps toward greater access, taken when it feels safe, can make a meaningful difference over time.";
+        }
+        return "Your responses indicate that there may be one or more areas where your independent access to financial resources could be strengthened. Building awareness is itself a positive step.";
+      };
+
+      return (
+        <div className="min-h-screen gentle-bg px-4 py-10 pb-24">
+          <div className="max-w-xl mx-auto">
+            <div className="text-center mb-8">
+              <h1 className="font-display text-2xl md:text-3xl font-bold text-plum-900 mb-2">Financial Independence Check</h1>
+              <p className="text-plum-600 text-sm leading-relaxed max-w-md mx-auto">
+                A private space for gentle self-reflection. There are no right or wrong answers — only information that belongs to you.
+              </p>
+            </div>
+
+            {!submitted ? (
+              <div className="bg-white/80 backdrop-blur rounded-3xl p-6 md:p-8 card-shadow border border-plum-100/50 space-y-6">
+                {questions.map((q, i) => (
+                  <div key={i}>
+                    <p className="text-plum-800 font-medium mb-3">{i + 1}. {q}</p>
+                    <div className="flex gap-3">
+                      {["yes", "sometimes", "no"].map(opt => (
+                        <button
+                          key={opt}
+                          onClick={() => setAnswer(i, opt)}
+                          className={`flex-1 py-2.5 rounded-xl text-sm font-medium capitalize transition border ${
+                            answers[i] === opt
+                              ? "bg-plum-700 text-white border-plum-700"
+                              : "bg-white text-plum-700 border-plum-200 hover:bg-plum-50"
+                          }`}
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
+                <button
+                  disabled={!allAnswered}
+                  onClick={() => setSubmitted(true)}
+                  className={`w-full py-3.5 rounded-xl font-semibold transition ${
+                    allAnswered
+                      ? "bg-plum-700 hover:bg-plum-800 text-white shadow-md"
+                      : "bg-plum-100 text-plum-400 cursor-not-allowed"
+                  }`}
+                >
+                  See reflection
+                </button>
+              </div>
+            ) : (
+              <div className="bg-white/90 backdrop-blur rounded-3xl p-6 md:p-8 card-shadow border border-plum-100/50 space-y-6">
+                <div className="p-5 rounded-2xl bg-plum-50 border border-plum-100">
+                  <p className="text-plum-800 leading-relaxed">{getInsight()}</p>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold text-plum-800 mb-3">Gentle next steps you might consider</h3>
+                  <ul className="space-y-2 text-sm text-plum-700">
+                    <li className="flex gap-2"><span>•</span> Build an independent emergency fund when safe and possible</li>
+                    <li className="flex gap-2"><span>•</span> Maintain access to important financial information and documents</li>
+                    <li className="flex gap-2"><span>•</span> Learn about personal banking options and financial rights</li>
+                  </ul>
+                </div>
+
+                <div className="pt-2">
+                  <a
+                    href="https://ncwapps.nic.in/helplines.aspx"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-5 py-3 bg-plum-700 hover:bg-plum-800 text-white font-medium rounded-xl transition shadow-md"
+                  >
+                    Explore Support & Financial Resources →
+                  </a>
+                  <p className="text-xs text-plum-500 mt-2">Links to verified public resources including the National Commission for Women helpline.</p>
+                </div>
+
+                <button
+                  onClick={() => { setSubmitted(false); setAnswers(Array(5).fill(null)); }}
+                  className="text-sm text-plum-600 underline hover:text-plum-800"
+                >
+                  Retake reflection
+                </button>
+              </div>
+            )}
+
+            <div className="mt-8 text-center">
+              <button onClick={() => onNavigate("dashboard")} className="text-plum-600 hover:text-plum-800 text-sm font-medium">
+                ← Back to Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ========== APP ==========
+    function App() {
+      const [page, setPage] = useState("landing");
+      const [user, setUser] = useState(() => {
+        try {
+          const saved = localStorage.getItem("sheearns_user");
+          return saved ? JSON.parse(saved) : DEFAULT_USER;
+        } catch { return DEFAULT_USER; }
+      });
+
+      useEffect(() => {
+        localStorage.setItem("sheearns_user", JSON.stringify(user));
+      }, [user]);
+
+      const navigate = (p) => setPage(p);
+
+      return (
+        <div>
+          {/* Simple nav when not landing */}
+          {page !== "landing" && (
+            <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-plum-100 px-4 py-3">
+              <div className="max-w-5xl mx-auto flex items-center justify-between">
+                <button onClick={() => setPage("landing")} className="font-display font-bold text-plum-800 text-lg">
+                  SheEarns
+                </button>
+                <div className="flex gap-1 text-sm">
+                  {[
+                    { id: "onboarding", label: "Profile" },
+                    { id: "dashboard", label: "Dashboard" },
+                    { id: "score", label: "SheScore" },
+                    { id: "independence", label: "Independence" }
+                  ].map(n => (
+                    <button
+                      key={n.id}
+                      onClick={() => setPage(n.id)}
+                      className={`px-3 py-1.5 rounded-lg transition ${page === n.id ? "bg-plum-100 text-plum-800 font-medium" : "text-plum-600 hover:bg-plum-50"}`}
+                    >
+                      {n.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </nav>
+          )}
+
+          {page === "landing" && <Landing onStart={() => setPage("onboarding")} />}
+          {page === "onboarding" && <Onboarding user={user} setUser={setUser} onComplete={() => setPage("dashboard")} />}
+          {page === "dashboard" && <Dashboard user={user} setUser={setUser} onViewScore={() => setPage("score")} onNavigate={navigate} />}
+          {page === "score" && <SheScorePage user={user} setUser={setUser} onNavigate={navigate} />}
+          {page === "independence" && <IndependenceCheck onNavigate={navigate} />}
+        </div>
+      );
+    }
+
+    try {
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<App />);
+    } catch (err) {
+      console.error(err);
+      document.getElementById("root").innerHTML = `
+        <div style="padding:40px;font-family:system-ui;color:#54243a;max-width:600px;margin:40px auto;">
+          <h2 style="color:#a84d7a;">Something went wrong</h2>
+          <p>Open the browser console (press F12 → Console tab) and copy the red error message.</p>
+          <pre style="background:#faf5f7;padding:16px;border-radius:12px;overflow:auto;font-size:13px;">${err.message}</pre>
+        </div>`;
+    }
+  </script>
+
+  <script>
+    // Manually transform the app source with the CLASSIC JSX runtime.
+    // (Babel's DOM auto-scan defaults to the "automatic" runtime, which
+    // injects `import { jsx as _jsx } from "react/jsx-runtime"` into the
+    // output — illegal outside a <script type="module">, and the cause
+    // of "Cannot use import statement outside a module".)
+    try {
+      var sourceCode = document.getElementById('app-source').textContent;
+      var compiled = Babel.transform(sourceCode, {
+        presets: [["react", { runtime: "classic" }]]
+      }).code;
+      var runScript = document.createElement('script');
+      runScript.text = compiled;
+      document.body.appendChild(runScript);
+    } catch (err) {
+      console.error(err);
+      document.getElementById('root').innerHTML =
+        '<div style="padding:40px;font-family:system-ui;color:#54243a;max-width:600px;margin:40px auto;">' +
+        '<h2 style="color:#a84d7a;">Something went wrong while compiling</h2>' +
+        '<pre style="background:#faf5f7;padding:16px;border-radius:12px;overflow:auto;font-size:13px;">' +
+        (err && err.message ? err.message : String(err)) + '</pre></div>';
+    }
+  </script>
+</body>
+</html>
