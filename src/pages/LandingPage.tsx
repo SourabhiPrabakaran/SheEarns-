@@ -8,7 +8,8 @@ import {
   BookOpen,
   Briefcase,
   CheckCircle2,
-  Lock
+  Lock,
+  Activity
 } from 'lucide-react';
 import { BrandLogo } from '../components/common/BrandLogo';
 
@@ -29,44 +30,48 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
   };
 
   return (
-    <div id="top" className="min-h-screen bg-transparent text-[#1e191b] flex flex-col justify-between selection:bg-[#f2ebe0]">
+    <div className="w-full flex flex-col text-[#1e191b]">
       {/* Clean, Professional Landing Page Header */}
       <header className="sticky top-0 z-50 bg-[#faf8f5]/95 backdrop-blur-md border-b border-[#ece6de] transition-all">
-        <div className="max-w-6xl lg:max-w-7xl mx-auto px-6 sm:px-10 h-[80px] flex items-center justify-between gap-6">
-          {/* Exact SHEEARNS logo image on the far left - No separate text */}
+        <div className="max-w-6xl lg:max-w-7xl mx-auto px-4 sm:px-8 lg:px-10 h-[80px] flex items-center justify-between gap-4 sm:gap-6">
+          {/* Exact SHEEARNS logo image on the far left */}
           <div className="flex items-center shrink-0">
             <button
               onClick={() => scrollTo('top')}
-              className="transition cursor-pointer block"
+              className="transition cursor-pointer block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#762e50] focus-visible:ring-offset-2"
               title="SheEarns Home"
+              aria-label="SheEarns Home"
             >
               <BrandLogo size="header" />
             </button>
           </div>
 
           {/* Navigation links: Home | How It Works | Features | Why SheEarns */}
-          <nav className="hidden md:flex items-center gap-8 lg:gap-12 font-sans text-[16px] font-medium text-stone-700">
+          <nav 
+            aria-label="Landing Page Navigation"
+            className="hidden md:flex items-center gap-6 lg:gap-10 font-sans text-[15px] font-medium text-stone-700"
+          >
             <button
               onClick={() => scrollTo('top')}
-              className="hover:text-[#1e191b] transition-colors py-1 cursor-pointer tracking-normal"
+              className="hover:text-[#1e191b] transition-colors py-1 cursor-pointer tracking-normal rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#762e50]"
             >
               Home
             </button>
             <button
               onClick={() => scrollTo('how-it-works')}
-              className="hover:text-[#1e191b] transition-colors py-1 cursor-pointer tracking-normal"
+              className="hover:text-[#1e191b] transition-colors py-1 cursor-pointer tracking-normal rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#762e50]"
             >
               How It Works
             </button>
             <button
               onClick={() => scrollTo('features')}
-              className="hover:text-[#1e191b] transition-colors py-1 cursor-pointer tracking-normal"
+              className="hover:text-[#1e191b] transition-colors py-1 cursor-pointer tracking-normal rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#762e50]"
             >
               Features
             </button>
             <button
               onClick={() => scrollTo('why-sheearns')}
-              className="hover:text-[#1e191b] transition-colors py-1 cursor-pointer tracking-normal"
+              className="hover:text-[#1e191b] transition-colors py-1 cursor-pointer tracking-normal rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#762e50]"
             >
               Why SheEarns
             </button>
@@ -76,7 +81,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
           <div className="flex items-center shrink-0">
             <button
               onClick={onStart}
-              className="px-6 sm:px-7 py-3 rounded-full bg-[#1e191b] hover:bg-black text-white text-[15px] font-sans font-medium transition-all shadow-xs hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              className="px-6 sm:px-7 py-2.5 sm:py-3 rounded-full bg-[#1e191b] hover:bg-black text-white text-xs sm:text-[15px] font-sans font-medium transition-all shadow-xs hover:scale-[1.02] active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#762e50] focus-visible:ring-offset-2"
             >
               Get Started
             </button>
@@ -107,7 +112,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
             <div className="flex flex-wrap items-center gap-4 pt-2">
               <button
                 onClick={onStart}
-                className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-full bg-[#1e191b] hover:bg-black text-white text-sm font-sans font-medium transition-all shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-full bg-[#1e191b] hover:bg-black text-white text-sm font-sans font-medium transition-all shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#762e50] focus-visible:ring-offset-2"
               >
                 <span>Get Started</span>
                 <ArrowRight className="w-4 h-4" />
@@ -115,7 +120,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
 
               <button
                 onClick={() => scrollTo('how-it-works')}
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-transparent hover:bg-stone-200/50 text-stone-800 border border-stone-300 text-sm font-sans font-medium transition cursor-pointer"
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-transparent hover:bg-stone-200/50 text-stone-800 border border-stone-300 text-sm font-sans font-medium transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#762e50] focus-visible:ring-offset-2"
               >
                 <span>See How It Works</span>
               </button>
@@ -138,15 +143,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
             </div>
           </div>
 
-          {/* Right Column: Universal Platform Readiness Framework Preview (No demo-specific names or scores) */}
+          {/* Right Column: Universal Platform Readiness Framework Preview */}
           <div className="lg:col-span-5">
             <div className="relative">
               {/* Subtle background glow */}
               <div className="absolute -inset-2 bg-gradient-to-tr from-[#f3e8ee] via-[#faf5f7] to-[#f5eedc] rounded-3xl blur-xl opacity-70 -z-10" />
 
-              <div className="bg-white/95 rounded-3xl p-6 sm:p-7 border border-[#ece6de] card-shadow space-y-6 text-left">
+              <div className="bg-white/95 rounded-3xl p-6 sm:p-7 border border-[#ece6de] card-shadow space-y-5 text-left">
                 {/* Preview Header */}
-                <div className="flex items-center justify-between pb-4 border-b border-stone-100">
+                <div className="flex items-center justify-between pb-3.5 border-b border-stone-100">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-[#762e50]" />
                     <span className="text-xs font-semibold text-stone-600 uppercase tracking-wider">
@@ -159,7 +164,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
                 </div>
 
                 {/* Framework Overview */}
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                   <span className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider block">
                     Financial Independence Architecture
                   </span>
@@ -167,39 +172,39 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
                     Beyond Traditional <span className="italic font-serif text-[#762e50]">Credit Scoring.</span>
                   </h3>
                   <p className="text-xs text-stone-600 leading-relaxed font-normal">
-                    Evaluating real-world financial strength through surplus cash flow, emergency buffers, and business activity.
+                    Evaluating real-world financial strength through cash flow surplus, savings discipline, and emergency reserves.
                   </p>
                 </div>
 
-                {/* 5 Holistic Pillars List */}
-                <div className="space-y-2.5 pt-1">
-                  <div className="p-3 rounded-2xl bg-[#faf8f5] border border-[#ece6de] flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-7 h-7 rounded-xl bg-white border border-[#ece6de] flex items-center justify-center text-stone-800">
-                        <Coins className="w-3.5 h-3.5" />
-                      </div>
-                      <div>
-                        <span className="text-xs font-semibold text-[#1e191b] block">Cash Flow Health</span>
-                        <span className="text-[10px] text-stone-500">Monthly surplus ratio & debt service capacity</span>
-                      </div>
-                    </div>
-                    <span className="text-[10px] font-semibold text-stone-600 px-2 py-0.5 rounded-full bg-stone-100">25%</span>
-                  </div>
-
-                  <div className="p-3 rounded-2xl bg-[#faf8f5] border border-[#ece6de] flex items-center justify-between gap-3">
+                {/* 5 Real Implemented Pillars */}
+                <div className="space-y-2 pt-0.5">
+                  <div className="p-2.5 rounded-2xl bg-[#faf8f5] border border-[#ece6de] flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2.5">
                       <div className="w-7 h-7 rounded-xl bg-white border border-[#ece6de] flex items-center justify-center text-stone-800">
                         <TrendingUp className="w-3.5 h-3.5" />
                       </div>
                       <div>
                         <span className="text-xs font-semibold text-[#1e191b] block">Savings Stability</span>
-                        <span className="text-[10px] text-stone-500">Consistent savings habits and inflow retention</span>
+                        <span className="text-[10px] text-stone-500">Savings rate & monthly inflow retention</span>
                       </div>
                     </div>
                     <span className="text-[10px] font-semibold text-stone-600 px-2 py-0.5 rounded-full bg-stone-100">25%</span>
                   </div>
 
-                  <div className="p-3 rounded-2xl bg-[#faf8f5] border border-[#ece6de] flex items-center justify-between gap-3">
+                  <div className="p-2.5 rounded-2xl bg-[#faf8f5] border border-[#ece6de] flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-xl bg-white border border-[#ece6de] flex items-center justify-center text-stone-800">
+                        <Coins className="w-3.5 h-3.5" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-semibold text-[#1e191b] block">Cash Flow Health</span>
+                        <span className="text-[10px] text-stone-500">Monthly surplus ratio & debt-service capacity</span>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-semibold text-stone-600 px-2 py-0.5 rounded-full bg-stone-100">25%</span>
+                  </div>
+
+                  <div className="p-2.5 rounded-2xl bg-[#faf8f5] border border-[#ece6de] flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2.5">
                       <div className="w-7 h-7 rounded-xl bg-white border border-[#ece6de] flex items-center justify-center text-stone-800">
                         <ShieldCheck className="w-3.5 h-3.5" />
@@ -212,22 +217,35 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
                     <span className="text-[10px] font-semibold text-stone-600 px-2 py-0.5 rounded-full bg-stone-100">20%</span>
                   </div>
 
-                  <div className="p-3 rounded-2xl bg-[#faf8f5] border border-[#ece6de] flex items-center justify-between gap-3">
+                  <div className="p-2.5 rounded-2xl bg-[#faf8f5] border border-[#ece6de] flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2.5">
                       <div className="w-7 h-7 rounded-xl bg-white border border-[#ece6de] flex items-center justify-center text-stone-800">
                         <BookOpen className="w-3.5 h-3.5" />
                       </div>
                       <div>
-                        <span className="text-xs font-semibold text-[#1e191b] block">Financial Literacy & Stability</span>
-                        <span className="text-[10px] text-stone-500">Knowledge of loans, EMI, & income consistency</span>
+                        <span className="text-xs font-semibold text-[#1e191b] block">Financial Literacy</span>
+                        <span className="text-[10px] text-stone-500">Budgeting, EMI, loan terms & completed modules</span>
                       </div>
                     </div>
-                    <span className="text-[10px] font-semibold text-stone-600 px-2 py-0.5 rounded-full bg-stone-100">30%</span>
+                    <span className="text-[10px] font-semibold text-stone-600 px-2 py-0.5 rounded-full bg-stone-100">15%</span>
+                  </div>
+
+                  <div className="p-2.5 rounded-2xl bg-[#faf8f5] border border-[#ece6de] flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-xl bg-white border border-[#ece6de] flex items-center justify-center text-stone-800">
+                        <Activity className="w-3.5 h-3.5" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-semibold text-[#1e191b] block">Income Stability</span>
+                        <span className="text-[10px] text-stone-500">Recurring earning consistency & income resilience</span>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-semibold text-stone-600 px-2 py-0.5 rounded-full bg-stone-100">15%</span>
                   </div>
                 </div>
 
                 {/* SheAI Coaching Callout */}
-                <div className="p-4 rounded-2xl bg-[#faf5f7] border border-[#e9d0dc] space-y-1">
+                <div className="p-3.5 rounded-2xl bg-[#faf5f7] border border-[#e9d0dc] space-y-1">
                   <div className="flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-[#762e50]" />
                     <span className="text-[11px] font-semibold text-[#762e50] uppercase tracking-wider">
@@ -539,7 +557,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
           <div className="pt-2">
             <button
               onClick={onStart}
-              className="inline-flex items-center gap-2.5 px-8 py-4 rounded-full bg-white hover:bg-stone-100 text-[#1e191b] font-medium text-sm sm:text-base transition-all shadow-md hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              className="inline-flex items-center gap-2.5 px-8 py-4 rounded-full bg-white hover:bg-stone-100 text-[#1e191b] font-medium text-sm sm:text-base transition-all shadow-md hover:scale-[1.02] active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#1e191b]"
             >
               <span>Get Started</span>
               <ArrowRight className="w-4 h-4" />

@@ -74,41 +74,44 @@ export const SheAIAssistant: React.FC = () => {
 
   return (
     <>
-      {/* Floating Action Button */}
-      <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3">
-        {!isOpen && (
-          <button
-            onClick={toggleAssistant}
-            className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/95 backdrop-blur-md border border-[#ece6de] text-stone-800 text-xs font-medium shadow-lg hover:shadow-xl hover:border-stone-400 transition-all cursor-pointer group animate-in fade-in slide-in-from-right-2 duration-300"
-            title="Ask SheAI a financial question"
-          >
-            <span>Ask SheAI</span>
-            <span className="w-2 h-2 rounded-full bg-[#762e50] animate-pulse"></span>
-          </button>
-        )}
-
+      {/* Refined Cohesive Floating Assistant Launcher */}
+      <div className="fixed bottom-6 right-4 sm:right-6 z-50">
         <button
           onClick={toggleAssistant}
-          className={`w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all cursor-pointer group relative ${
+          className={`group flex items-center gap-2 sm:gap-2.5 p-1.5 pl-3.5 sm:pl-4 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#762e50] focus-visible:ring-offset-2 ${
             isOpen
-              ? 'bg-stone-800 text-white rotate-90 hover:bg-black'
-              : 'bg-[#1e191b] hover:bg-black text-white hover:scale-105 active:scale-95 border-2 border-[#dbc38e]/40'
+              ? 'bg-stone-900 border-stone-700 text-white hover:bg-black'
+              : 'bg-[#1e191b] border-[#dbc38e]/40 text-white hover:bg-black hover:scale-[1.03] active:scale-[0.97]'
           }`}
-          aria-label={isOpen ? 'Close SheAI Assistant' : 'Open SheAI Assistant'}
+          aria-label={isOpen ? 'Close SheAI Assistant' : 'Open SheAI Financial Assistant'}
           title={isOpen ? 'Close SheAI' : 'Ask SheAI Financial Assistant'}
         >
-          {isOpen ? (
-            <X className="w-6 h-6 transition-transform duration-200" />
-          ) : (
-            <>
-              <Sparkles className="w-6 h-6 text-[#dbc38e] group-hover:rotate-12 transition-transform duration-200" />
-              {/* Subtle indicator beacon */}
-              <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#762e50] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-[#762e50] border-2 border-white"></span>
-              </span>
-            </>
-          )}
+          <span className="flex items-center gap-1.5 text-xs font-sans font-medium tracking-normal text-stone-200 group-hover:text-white transition-colors">
+            <Sparkles className="w-3.5 h-3.5 text-[#dbc38e] group-hover:rotate-12 transition-transform duration-300" />
+            <span className={isOpen ? 'inline' : 'hidden sm:inline'}>
+              {isOpen ? 'Close SheAI' : 'Ask SheAI'}
+            </span>
+          </span>
+
+          <div
+            className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+              isOpen
+                ? 'bg-white/20 text-white rotate-90'
+                : 'bg-white/10 group-hover:bg-[#762e50] text-[#dbc38e] group-hover:text-white'
+            }`}
+          >
+            {isOpen ? (
+              <X className="w-4 h-4" />
+            ) : (
+              <div className="relative flex items-center justify-center">
+                <Bot className="w-4 h-4" />
+                <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#762e50] opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#762e50]"></span>
+                </span>
+              </div>
+            )}
+          </div>
         </button>
       </div>
 
@@ -142,8 +145,9 @@ export const SheAIAssistant: React.FC = () => {
 
             <button
               onClick={closeAssistant}
-              className="w-8 h-8 rounded-full hover:bg-white/10 text-stone-300 hover:text-white flex items-center justify-center transition cursor-pointer"
+              className="w-8 h-8 rounded-full hover:bg-white/10 text-stone-300 hover:text-white flex items-center justify-center transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
               title="Close (Esc)"
+              aria-label="Close SheAI dialog"
             >
               <X className="w-4 h-4" />
             </button>
@@ -227,7 +231,7 @@ export const SheAIAssistant: React.FC = () => {
                   key={idx}
                   onClick={() => handleSend(q)}
                   disabled={isLoading}
-                  className="px-2.5 py-1 rounded-full bg-[#faf8f5] hover:bg-stone-100 border border-[#ece6de] text-stone-700 text-[11px] font-medium whitespace-nowrap transition cursor-pointer hover:border-stone-400 shrink-0 disabled:opacity-50"
+                  className="px-2.5 py-1 rounded-full bg-[#faf8f5] hover:bg-stone-100 border border-[#ece6de] text-stone-700 text-[11px] font-medium whitespace-nowrap transition cursor-pointer hover:border-stone-400 shrink-0 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#762e50]"
                 >
                   {q}
                 </button>
@@ -246,14 +250,16 @@ export const SheAIAssistant: React.FC = () => {
                 onKeyDown={handleKeyDown}
                 placeholder="Ask SheAI a financial question..."
                 disabled={isLoading}
-                className="flex-1 px-4 py-2.5 rounded-full bg-[#faf8f5] border border-[#ece6de] text-xs sm:text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400 disabled:opacity-50"
+                aria-label="Financial question input"
+                className="flex-1 px-4 py-2.5 rounded-full bg-[#faf8f5] border border-[#ece6de] text-xs sm:text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#762e50] focus:border-transparent disabled:opacity-50"
               />
 
               <button
                 onClick={() => handleSend()}
                 disabled={!inputVal.trim() || isLoading}
-                className="w-10 h-10 rounded-full bg-[#1e191b] hover:bg-black text-white flex items-center justify-center transition disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer shrink-0 shadow-xs"
+                className="w-10 h-10 rounded-full bg-[#1e191b] hover:bg-black text-white flex items-center justify-center transition disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer shrink-0 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#762e50]"
                 title="Send Question (Enter)"
+                aria-label="Send question to SheAI"
               >
                 {isLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

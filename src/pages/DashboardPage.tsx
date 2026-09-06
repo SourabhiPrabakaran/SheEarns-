@@ -53,9 +53,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
   const learningRecommendation = getRecommendedLearningModule(user, scoreData, financialHistory);
 
   return (
-    <div className="min-h-screen bg-transparent text-[#1e191b] px-4 sm:px-6 py-10 pb-24 text-left">
-      <div className="max-w-5xl mx-auto space-y-8">
-        {/* Header with Greeting */}
+    <div className="min-h-screen bg-transparent text-[#1e191b] px-4 sm:px-6 py-8 sm:py-10 pb-24 text-left">
+      <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
+        {/* Header with Greeting & SheScore Quick Snapshot */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 bg-white rounded-3xl p-6 sm:p-8 card-shadow border border-[#ece6de]">
           <div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#faf5f7] text-[#762e50] border border-[#e9d0dc] text-xs font-semibold mb-2.5">
@@ -70,21 +70,23 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             </p>
           </div>
 
-          <div className="flex items-center gap-4 shrink-0 bg-[#faf8f5] p-4 rounded-2xl border border-[#ece6de]">
+          <div className="flex items-center gap-4 shrink-0 bg-[#faf8f5] p-3.5 sm:p-4 rounded-2xl border border-[#ece6de]">
             <div className="text-right">
               <span className="block text-[10px] uppercase tracking-wider font-semibold text-stone-500">
                 SheScore
               </span>
-              <span className="font-display text-3xl font-extrabold text-[#1e191b]">
+              <span className="font-display text-3xl sm:text-4xl font-extrabold text-[#1e191b] leading-tight block">
                 {scoreData.displayScore}
               </span>
-              <span className="block text-[11px] font-medium text-[#762e50]">
+              <span className="inline-block text-[10px] font-semibold text-[#762e50] px-2 py-0.5 rounded-full bg-[#faf5f7] border border-[#e9d0dc]">
                 {scoreData.status}
               </span>
             </div>
             <button
               onClick={() => onNavigate('score')}
-              className="px-4 py-2 rounded-full bg-[#1e191b] hover:bg-black text-white font-medium text-xs shadow-xs transition-all flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98]"
+              className="px-4 py-2.5 rounded-full bg-[#1e191b] hover:bg-black text-white font-medium text-xs shadow-xs transition-all flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#762e50] focus-visible:ring-offset-2"
+              title="View full SheScore breakdown"
+              aria-label="View full SheScore breakdown"
             >
               <span>View SheScore</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -93,7 +95,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         </div>
 
         {/* 4 Summary Stat Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           <StatCard
             label="Monthly Income"
             value={user.monthlyIncome}
@@ -141,7 +143,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             </div>
             <button
               onClick={() => onNavigate('score')}
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white hover:bg-stone-100 text-[#1e191b] font-medium text-xs sm:text-sm transition-all shadow-sm shrink-0 hover:scale-[1.02] active:scale-[0.98]"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white hover:bg-stone-100 text-[#1e191b] font-medium text-xs sm:text-sm transition-all shadow-sm shrink-0 hover:scale-[1.02] active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#1e191b]"
             >
               <span>View My Improvement Plan</span>
               <ArrowRight className="w-4 h-4" />
@@ -257,7 +259,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             <div className="mt-4 pt-3 border-t border-[#ece6de] text-right">
               <button
                 onClick={() => onNavigate('score')}
-                className="text-xs font-semibold text-stone-700 hover:text-[#1e191b] inline-flex items-center gap-1"
+                className="text-xs font-semibold text-stone-700 hover:text-[#1e191b] inline-flex items-center gap-1 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#762e50]"
               >
                 <span>Explore score breakdown</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -337,7 +339,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 <button
                   type="button"
                   onClick={() => onNavigate(`learning-${learningRecommendation.moduleId}` as PageId)}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[#1e191b] hover:bg-black text-white text-xs sm:text-sm font-sans font-medium transition-all shadow-xs hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[#1e191b] hover:bg-black text-white text-xs sm:text-sm font-sans font-medium transition-all shadow-xs hover:scale-[1.02] active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#762e50] focus-visible:ring-offset-2"
                 >
                   <span>Start Learning →</span>
                 </button>
@@ -353,8 +355,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               return (
                 <div
                   key={module.id}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`Open learning module: ${module.title}`}
                   onClick={() => onNavigate(`learning-${module.id}` as PageId)}
-                  className={`p-5 sm:p-6 rounded-3xl border transition-all flex flex-col justify-between cursor-pointer group hover:shadow-md hover:-translate-y-0.5 relative ${
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onNavigate(`learning-${module.id}` as PageId);
+                    }
+                  }}
+                  className={`p-5 sm:p-6 rounded-3xl border transition-all flex flex-col justify-between cursor-pointer group hover:shadow-md hover:-translate-y-0.5 relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#762e50] focus-visible:ring-offset-2 ${
                     isRecommended && !isCompleted
                       ? 'bg-[#faf5f7]/60 border-[#e9d0dc] ring-1 ring-[#e9d0dc]/80'
                       : isCompleted
@@ -400,7 +411,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                         e.stopPropagation();
                         toggleModule(module.id);
                       }}
-                      className={`w-full py-2.5 rounded-full text-xs font-sans font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      className={`w-full py-2.5 rounded-full text-xs font-sans font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#762e50] focus-visible:ring-offset-1 ${
                         isCompleted
                           ? 'bg-emerald-700 hover:bg-emerald-800 text-white shadow-xs'
                           : 'bg-white hover:bg-stone-100 text-stone-800 border border-[#ece6de]'
@@ -429,14 +440,14 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
           <button
             onClick={() => onNavigate('score')}
-            className="px-7 py-3.5 bg-[#1e191b] hover:bg-black text-white font-medium rounded-full shadow-sm transition flex items-center gap-2 text-xs sm:text-sm hover:scale-[1.02] active:scale-[0.98]"
+            className="px-7 py-3.5 bg-[#1e191b] hover:bg-black text-white font-medium rounded-full shadow-sm transition flex items-center gap-2 text-xs sm:text-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#762e50] focus-visible:ring-offset-2"
           >
             <span>View Full SheScore Breakdown</span>
             <ArrowRight className="w-4 h-4" />
           </button>
           <button
             onClick={() => onNavigate('independence')}
-            className="px-6 py-3.5 bg-white border border-stone-300 hover:bg-stone-50 text-stone-800 font-medium rounded-full transition text-xs sm:text-sm"
+            className="px-6 py-3.5 bg-white border border-stone-300 hover:bg-stone-50 text-stone-800 font-medium rounded-full transition text-xs sm:text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#762e50] focus-visible:ring-offset-2"
           >
             Financial Independence Check →
           </button>
