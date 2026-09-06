@@ -27,6 +27,8 @@ function validateOutput(parsed) {
     key_point: key_point.trim(),
     disclaimer: disclaimer.trim()
   };
+}
+
 // Load local .env if available without external dependencies
 if (!process.env.GROQ_API_KEY && fs.existsSync('.env')) {
   try {
